@@ -1,0 +1,187 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "885dea3e-3b59-bf59-498f-9ae058cdbbd4",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "inline_params": {
+              "value": {
+                "value": "{\"modality\":\"Imaging\",\"pipeline_runId\":\"@{pipeline().RunId}\"}",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "hc_tag_1"
+        },
+        "policy": {
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "raw_process_movement",
+        "description": "This notebook activity orchestrates file movement from the Ingest folder to the Process Folder and ensures the presence of all file names in the Process folder.\nPlease note that there should not be more than one instance of this notebook running as this will cause inconsistent results.",
+        "dependsOn": [
+          {
+            "activity": "Prep DICOM Data",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "464cb07d-045d-84ef-4680-3666ca2afe56",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "inline_params": {
+              "value": {
+                "value": "{\"pipeline_runId\":\"@{pipeline().RunId}\"}",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "hc_tag_1"
+        },
+        "policy": {
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "imaging_dicom_extract_bronze_ingestion",
+        "description": "The extraction notebook activity helps extract metadata (DICOM tags) from the ingested DICOM dcm files.\nPlease note that there should not be more than one instance of this notebook running as this will cause inconsistent results.",
+        "dependsOn": [
+          {
+            "activity": "raw_process_movement",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "62202726-db2c-a920-4193-75b5c3bfea75",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "inline_params": {
+              "value": {
+                "value": "{\"pipeline_runId\":\"@{pipeline().RunId}\"}",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "hc_tag_1"
+        },
+        "policy": {
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "imaging_dicom_fhir_conversion",
+        "description": "The conversion notebook activity will then convert the metadata to the FHIR presentation of ImagingStudy in ndjson format.\nPlease note that there should not be more than one instance of this notebook running as this will cause inconsistent results.",
+        "dependsOn": [
+          {
+            "activity": "imaging_dicom_extract_bronze_ingestion",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "1a8a1cfa-d0e1-9f8b-44f2-59a2550461ec",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "inline_params": {
+              "value": {
+                "value": "{\"pipeline_runId\":\"@{pipeline().RunId}\"}",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "hc_tag_1"
+        },
+        "policy": {
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "fhir_ndjson_bronze_ingestion",
+        "description": "This notebook activity facilitates the ingestion of FHIR ndjson data into Delta tables within the bronze lakehouse.\nPlease note that there should not be more than one instance of this notebook running as this will cause inconsistent results.",
+        "dependsOn": [
+          {
+            "activity": "imaging_dicom_fhir_conversion",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "10ca494b-6363-8968-4f5c-af3b2228380d",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "inline_params": {
+              "value": {
+                "value": "{\"pipeline_runId\":\"@{pipeline().RunId}\"}",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "hc_tag_1"
+        },
+        "policy": {
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "bronze_silver_flatten",
+        "description": "This notebook activity transforms and flattens the data from the bronze lakehouse and ingests the data into the silver lakehouse.\nPlease note that there should not be more than one instance of this notebook running as this will cause inconsistent results.",
+        "dependsOn": [
+          {
+            "activity": "fhir_ndjson_bronze_ingestion",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "465a3857-000e-8604-469c-326c69a19af0",
+          "workspaceId": "00000000-0000-0000-0000-000000000000"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Prep DICOM Data",
+        "dependsOn": []
+      }
+    ]
+  }
+}
