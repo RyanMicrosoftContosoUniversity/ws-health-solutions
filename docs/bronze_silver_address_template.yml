@@ -1,0 +1,128 @@
+table_metadata:
+  schema_name: "silver"
+  table_name: "Address"
+  format: "delta"
+  mode: "overwrite"
+  options:
+    mergeSchema: true
+  path: "abfss://c0a7b8a9-eb12-495a-b863-2cb583e31154@onelake.dfs.fabric.microsoft.com/b6820dc7-5427-4572-b227-a1813ceadb49/Tables/silver/Address"
+  columns:
+    - name: "AddressID"
+      type: "IntegerType"
+      nullable: false
+      unique: true
+      primary_key: true
+    - name: "AddressLine1"
+      type: "StringType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "AddressLine2"
+      type: "StringType"
+      nullable: true
+      unique: false
+      primary_key: false
+    - name: "City"
+      type: "StringType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "StateProvince"
+      type: "StringType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "CountryRegion"
+      type: "StringType"
+      nullable: false
+      unique: false
+      primary_key: false
+      allowed_values:
+        - "United States"
+        - "Canada"
+        - "United Kingdom"
+    - name: "PostalCode"
+      type: "StringType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "rowguid"
+      type: "StringType"
+      nullable: false
+      unique: true
+      primary_key: false
+    - name: "ModifiedDate"
+      type: "TimestampType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "current"
+      type: "BooleanType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "effectiveDate"
+      type: "TimestampType"
+      nullable: false
+      unique: false
+      primary_key: false
+    - name: "endDate"
+      type: "TimestampType"
+      nullable: false
+      unique: false
+      primary_key: false
+
+security:
+  sensitivity_labels:
+    - column: "AddressID"
+      label: "None"
+    - column: "AddressLine1"
+      label: "None"
+    - column: "AddressLine2"
+      label: "None"
+    - column: "StateProvince"
+      label: "None"
+    - column: "PostalCode"
+      label: "None"
+    - column: "rowguid"
+      label: "None"
+    - column: "ModifiedDate"
+      label: "None"
+    - column: "current"
+      label: "None"
+    - column: "effectiveDate"
+      label: "None"
+    - column: "endDate"
+      label: "None"
+  row_filtering_rules:
+    - rule_name: "Address_Filter"
+      rule_expression: "current = 1 AND effectiveDate <= GETDATE() AND (endDate IS NULL OR endDate > GETDATE())"
+      description: "Filter to show only current addresses that are effective today or in the future."
+
+transformations:
+  column_renames:
+    - source: "id"
+      target: "AddressID"
+  joins:
+
+  unions:
+
+  filters:
+
+deployment_info:
+  environment: "dev"
+  pipeline:
+  schedule:
+  last_deployed:
+  version: "0.0.1"
+  data_lineage:
+    - source: "staging.Address"
+      target: "silver.Address"
+      transformation_steps:
+        - "First Step"
+        - "Second Step"
+        - "Third Step"
+         
+       
+
+   
