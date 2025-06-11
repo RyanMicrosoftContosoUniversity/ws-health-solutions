@@ -1,0 +1,54 @@
+trigger:
+- main
+
+parameters:
+- name: versionBump
+  displayName: Version increment type
+  type: string
+  default: patch
+  values:
+  - patch
+  - minor
+  - major
+
+stages:
+- stage: Build
+  jobs:
+  - job: build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.11'
+    - script: |
+        set -e
+        echo "Current version before bump:" $(grep -oP "version='\K[^']+" setup.py)
+        bump='${{ parameters.versionBump }}'
+        current=$(grep -oP "version='\K[^']+" setup.py)
+        IFS='.' read -r major minor patch <<< "$current"
+        case "$bump" in
+          major)
+            major=$((major+1)); minor=0; patch=0;;
+          minor)
+            minor=$((minor+1)); patch=0;;
+          patch)
+            patch=$((patch+1));;
+          *)
+            echo "Unknown bump type: $bump"; exit 1;;
+        esac
+        new_version="${major}.${minor}.${patch}"
+        echo "Bumped version to $new_version"
+        sed -i "s/version='[^']*'/version='${new_version}'/" setup.py
+      displayName: 'Bump package version'
+    - script: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
+    - script: |
+        python setup.py sdist bdist_wheel
+      displayName: 'Build distribution'
+    - publish: dist
+      artifact: python_dist
+      displayName: 'Publish distribution artifacts'
