@@ -12,7 +12,7 @@ with open(file="README.md", mode="r") as fh:
 
 setup(
     name='fabric_utils',
-    version='0.0.1',
+    version='0.0.2',
     install_requires=[
         'msal',
         'azure-identity',
