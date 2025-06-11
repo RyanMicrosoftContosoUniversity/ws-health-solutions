@@ -26,6 +26,9 @@ class SparkDetails:
                 ].tolist()[0]
             )
             logger.info("Retrieved SKU for capacity %s", capacity_name)
+            logger.info("Capacity SKU: %s", result)
+
+
             return result
         except Exception as exc:  # pragma: no cover - thin wrapper
             logger.error("Exception on get_capacity_sku: %s", exc)
@@ -50,6 +53,16 @@ class SparkDetails:
                 "Auto Scale Max Node Count"
             ].tolist()[0]
             logger.info("Retrieved custom pool details for %s", custom_pool_name)
+
+            logger.info(
+                "Custom pool details: Node Size: %s, Auto Scale Enabled: %s, "
+                "Min Node Count: %s, Max Node Count: %s",
+                node_size,
+                auto_scale_enabled,
+                auto_scale_min_node_count,
+                auto_scale_max_node_count,
+            )
+
             return (
                 node_size,
                 auto_scale_enabled,
@@ -80,4 +93,5 @@ class SparkDetails:
             "spark.native.enabled": conf.get("spark.native.enabled"),
         }
         logger.info("Retrieved Spark configuration details")
+        logger.info("Spark details: %s", details)
         return details
