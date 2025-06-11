@@ -1,3 +1,5 @@
 build/*
 dist/*
 src/fabric_utils.egg-info
+__pycache__/
+=*

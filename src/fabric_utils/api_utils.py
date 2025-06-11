@@ -6,7 +6,9 @@ import os
 import requests
 import notebookutils
 from notebookutils import mssparkutils
-import logging
+from .logging_config import get_logger
+
+logger = get_logger(__name__)
 
 class APIUtils:
     @staticmethod
